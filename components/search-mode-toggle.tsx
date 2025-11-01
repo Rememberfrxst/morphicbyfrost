@@ -1,13 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import { Globe } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 import { getCookie, setCookie } from '@/lib/utils/cookies'
-
-import { Toggle } from './ui/toggle'
+import { WebIcon } from './icons'
 
 export function SearchModeToggle() {
   const [isSearchMode, setIsSearchMode] = useState(true)
@@ -21,27 +18,41 @@ export function SearchModeToggle() {
     }
   }, [])
 
-  const handleSearchModeChange = (pressed: boolean) => {
-    setIsSearchMode(pressed)
-    setCookie('search-mode', pressed.toString())
-  }
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      const next = !isSearchMode
+      setIsSearchMode(next)
+      setCookie('search-mode', next.toString())
+    },
+    [isSearchMode],
+  )
 
   return (
-    <Toggle
-      aria-label="Toggle search mode"
-      pressed={isSearchMode}
-      onPressedChange={handleSearchModeChange}
-      variant="outline"
-      className={cn(
-        'gap-1 px-3 border border-input text-muted-foreground bg-background',
-        'data-[state=on]:bg-accent-blue',
-        'data-[state=on]:text-accent-blue-foreground',
-        'data-[state=on]:border-accent-blue-border',
-        'hover:bg-accent hover:text-accent-foreground rounded-full'
-      )}
-    >
-      <Globe className="size-4" />
-      <span className="text-xs">Search</span>
-    </Toggle>
+    <span className="inline-block" data-state={isSearchMode ? 'open' : 'closed'}>
+      <div
+        className={cn(
+          'inline-flex h-9 rounded-full border text-[13px] font-semibold text-token-text-secondary border-token-border-default focus-visible:outline-black dark:focus-visible:outline-white',
+          {
+            'radix-state-open:bg-black/10 bg-blue-50 text-blue-600 dark:text-blue-400 shadow-sm': isSearchMode,
+            'hover:bg-token-main-surface-secondary': !isSearchMode,
+          },
+        )}
+      >
+        <button
+          className="flex h-full min-w-8 items-center justify-center p-2"
+          aria-pressed={isSearchMode ? 'true' : 'false'}
+          aria-label="Toggle search mode"
+          onClick={handleClick}
+          type="button"
+        >
+          <WebIcon />
+          <span style={{ width: 'fit-content', opacity: 1, transform: 'none' }}>
+            <div className="ps-1 pe-1 font-semibold whitespace-nowrap [[data-collapse-labels]_&]:sr-only">Search</div>
+          </span>
+        </button>
+      </div>
+    </span>
   )
 }
